@@ -1,0 +1,46 @@
+FROM ubuntu:24.04
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cmake \
+    ninja-build \
+    gcc-arm-none-eabi \
+    libnewlib-arm-none-eabi \
+    gdb-multiarch \
+    binutils-multiarch \
+    libusb-1.0-0 \
+    libhidapi-libusb0 \
+    usbutils \
+    udev \
+    python3 \
+    strace \
+    curl \
+    ca-certificates \
+    git \
+    && ln -s /usr/bin/gdb-multiarch /usr/local/bin/arm-none-eabi-gdb \
+    && ln -s /usr/bin/objdump /usr/bin/objdump-multiarch \
+    && ln -s /usr/bin/nm /usr/bin/nm-multiarch \
+    && rm -rf /var/lib/apt/lists/*
+
+# udev rule for GD-Link (GigaDevice) debugger
+RUN echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="28e9", MODE="0666", GROUP="plugdev"' \
+    > /etc/udev/rules.d/99-gdlink.rules
+
+# Install GigaDevice xpack-openocd.
+RUN curl -fsSL https://github.com/burakenez/gd32-tools-xpack-openocd/releases/download/v0.12.0-6/xpack-openocd-0.12.0-6-linux-x64.tar.gz \
+        -o /tmp/xpack-openocd.tar.gz \
+    && tar -xzf /tmp/xpack-openocd.tar.gz -C /opt/ \
+    && ln -s /opt/xpack-openocd-0.12.0-6/bin/openocd /usr/local/bin/openocd \
+    && rm /tmp/xpack-openocd.tar.gz \
+    # Replace xpack-openocd's bundled libusb with the system one.
+    # The bundled version fails to open USB devices in Docker+WSL2 environments.
+    && ln -sf /usr/lib/x86_64-linux-gnu/libusb-1.0.so.0 /opt/xpack-openocd-0.12.0-6/libexec/libusb-1.0.so.0 \
+    # xpack-openocd bundles libhidapi-hidraw which accesses CMSIS-DAP via /dev/hidraw*.
+    # In Docker+WSL2, /dev/hidraw* is inaccessible even with --privileged.
+    # Replace it with libhidapi-libusb (same API, uses /dev/bus/usb instead) which works correctly.
+    && ln -sf /usr/lib/x86_64-linux-gnu/libhidapi-libusb.so.0 /opt/xpack-openocd-0.12.0-6/libexec/libhidapi-hidraw.so.0 \
+    # OpenOCD 0.12.x requires explicit VID/PID for CMSIS-DAP devices (0.11.x auto-matched all).
+    # GD-Link uses VID=0x28e9, PID=0x0189. Use the new 'cmsis-dap vid_pid' syntax.
+    && find /opt/xpack-openocd-0.12.0-6/openocd/scripts/target/ -name "openocd_gdlink_*.cfg" \
+       -exec sed -i '/^adapter driver cmsis-dap$/a cmsis-dap vid_pid 0x28e9 0x0189 0x28e9 0x058f 0x28e9 0x0497 0x28e9 0x068f 0x28e9 0xf002' {} \;
+
+WORKDIR /workspace

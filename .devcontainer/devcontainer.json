@@ -1,0 +1,24 @@
+{
+    "name": "GD32 ARM Toolchain",
+    "build": {
+        "dockerfile": "Containerfile",
+        "context": ".."
+    },
+    "runArgs": ["--privileged", "--device=/dev/bus/usb:/dev/bus/usb", "--group-add=keep-groups"],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cmake-tools",
+                "ms-vscode.cpptools",
+                "marus25.cortex-debug",
+                "mcu-debug.memory-view",
+                "mcu-debug.peripheral-viewer",
+                "ms-vscode.hexeditor",
+                "dan-c-underwood.arm",
+                "zixuanwang.linkerscript",
+                "trond-snekvik.gnu-mapfiles",
+                "mcu-debug.rtos-views"
+            ]
+        }
+    }
+}
