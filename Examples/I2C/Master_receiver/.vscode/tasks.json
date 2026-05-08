@@ -1,0 +1,126 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build and Flash",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [
+                "Build",
+                "Flash MCU",
+            ],
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "Flash MCU",
+            "type": "shell",
+            "command": "openocd -f '/opt/xpack-openocd-0.12.0-6/openocd/scripts/target/openocd_gdlink_gd32e51x.cfg' -c 'init; reset halt; flash write_image erase ${command:cmake.launchTargetFilename}; reset; exit'",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${command:cmake.buildDirectory}/Application",
+                "environment": {
+                    "CLICOLOR_FORCE": "1"
+                }
+            },
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "Reset MCU",
+            "type": "shell",
+            "command": "openocd -f '/opt/xpack-openocd-0.12.0-6/openocd/scripts/target/openocd_gdlink_gd32e51x.cfg' -c 'init; reset; exit'",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${command:cmake.buildDirectory}/Application",
+                "environment": {
+                    "CLICOLOR_FORCE": "1"
+                }
+            },
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "Mass Erase MCU",
+            "type": "shell",
+            "command": "openocd -f '/opt/xpack-openocd-0.12.0-6/openocd/scripts/target/openocd_gdlink_gd32e51x.cfg' -c 'init; reset halt; flash erase_sector 0 0 last; exit'",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${command:cmake.buildDirectory}/Application",
+                "environment": {
+                    "CLICOLOR_FORCE": "1"
+                }
+            },
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "OpenOCD Server",
+            "type": "shell",
+            "command": [
+                "openocd -f '/opt/xpack-openocd-0.12.0-6/openocd/scripts/target/openocd_gdlink_gd32e51x.cfg'"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${command:cmake.buildDirectory}/Application",
+                "environment": {
+                    "CLICOLOR_FORCE": "1"
+                }
+            },
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "Kill OpenOCD",
+            "type": "shell",
+            "command": "pkill -f openocd || true",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "never"
+            }
+        },
+        {
+            "label": "Build",
+            "type": "cmake",
+            "command": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"],
+            "options": {
+                "environment": {
+                    "CLICOLOR_FORCE": "1"
+                }
+            },
+            "presentation": {
+                "clear": true
+            }
+        }
+    ]
+}

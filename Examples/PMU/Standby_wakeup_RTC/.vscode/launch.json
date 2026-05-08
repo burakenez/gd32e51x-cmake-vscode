@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug with OpenOCD",
+            "type": "cortex-debug",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/Build/Debug/Application/Application.elf",
+            "servertype": "openocd",
+            "serverpath": "openocd",
+            "gdbPath": "/usr/bin/gdb-multiarch",
+            "configFiles": [
+                "/opt/xpack-openocd-0.12.0-6/openocd/scripts/target/openocd_gdlink_gd32e51x.cfg"
+            ],
+            "searchDir": [
+                "${workspaceFolder}"
+            ],
+            "svdFile": "${workspaceFolder}/GD32E51x_CL.svd",
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": 1
+            },
+            "runToEntryPoint": "main",
+            "showDevDebugOutput": "none",
+            "preLaunchTask": "Build"
+        },
+    ]
+}
